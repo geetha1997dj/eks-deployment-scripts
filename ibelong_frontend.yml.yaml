@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ibelongfrontend-service
+  namespace: development
+spec:
+  selector:
+    app: ibelongfrontend
+  ports:
+    - name: ibelongfrontend
+      protocol: TCP
+      port: 3004
+      targetPort: 3004
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ibelongfrontend-deployment
+  namespace: development
+  labels:
+    app: ibelongfrontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ibelongfrontend
+  template:
+    metadata:
+      labels:
+        app: ibelongfrontend
+    spec:
+      containers:
+      - name: ibelongfrontend
+        image: 712074000287.dkr.ecr.ap-south-1.amazonaws.com/yca_ibelong_frontend:latest
+        ports:
+        - containerPort: 3004

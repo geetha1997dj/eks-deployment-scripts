@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: hackathonfrontend-service
+  namespace: development
+spec:
+  selector:
+    app: hackathonfrontend
+  ports:
+    - name: hackathonfrontend
+      protocol: TCP
+      port: 3002
+      targetPort: 3002
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hackathonfrontend-deployment
+  namespace: development
+  labels:
+    app: hackathonfrontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hackathonfrontend
+  template:
+    metadata:
+      labels:
+        app: hackathonfrontend
+    spec:
+      containers:
+      - name: hackathonfrontend
+        image: 712074000287.dkr.ecr.ap-south-1.amazonaws.com/yca_hackathon_frontend:latest
+        ports:
+        - containerPort: 3002

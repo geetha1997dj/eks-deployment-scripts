@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ibelongbackend-service
+  namespace: development
+spec:
+  selector:
+    app: ibelongbackend
+  ports:
+    - name: ibelongbackend
+      protocol: TCP
+      port: 4001
+      targetPort: 4001
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ibelongbackend-deployment
+  namespace: development
+  labels:
+    app: ibelongbackend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ibelongbackend
+  template:
+    metadata:
+      labels:
+        app: ibelongbackend
+    spec:
+      containers:
+      - name: ibelongbackend
+        image: 712074000287.dkr.ecr.ap-south-1.amazonaws.com/yca_ibelong_backend:latest
+        ports:
+        - containerPort: 4001

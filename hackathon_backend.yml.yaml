@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: hackathonbackend-service
+  namespace: development
+spec:
+  selector:
+    app: hackathonbackend
+  ports:
+    - name: hackathonbackend
+      protocol: TCP
+      port: 3093
+      targetPort: 3093
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hackathonbackend-deployment
+  namespace: development
+  labels:
+    app: hackathonbackend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hackathonbackend
+  template:
+    metadata:
+      labels:
+        app: hackathonbackend
+    spec:
+      containers:
+      - name: hackathonbackend
+        image: 712074000287.dkr.ecr.ap-south-1.amazonaws.com/yca_hackathon_backend:latest
+        ports:
+        - containerPort: 3093

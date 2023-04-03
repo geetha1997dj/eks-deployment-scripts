@@ -1,0 +1,90 @@
+1. create a eks cluster using aws 
+   > provide name of the cluster : app-demo
+   > k8s version
+   > attach role : create and attach eks-service-role by attaching {amazoneksclusterpolicy & amazoneksservicepolicy}
+   > assign vpc and subnet
+   > control plane logging part modifications if needed
+   > select addons kubeproxy, coreDNS, vpcCNI and next
+   > review and create a cluster using aws GUI
+
+2. Now create a node group by assigning nodes
+   > First, ensure that you have created an Amazon EKS cluster and configured the kubectl command line tool to communicate with your cluster
+   > Next, you will need to create an IAM role that your nodes will use to access AWS resources. You can create this role using the AWS Management Console or the AWS 
+     CLI. Make sure to attach the AmazonEKSWorkerNodePolicy and AmazonEC2ContainerRegistryReadOnly policies & AmazonEKS_CNI_Policy to the role.       
+   > click on the cluster which you created go to compute then click on create node group then specify the name of nodegroup and add the role for eks-ng which you 
+     created above step
+   > next set compute and scalling configuration by adding the type of AMI, instance type, disk size, and node group scaling confuguration then add the networking  
+     subnets finally review and create it
+
+3. create a volume and attach it to instance which is present in nodegroup
+
+4. create one demo instance to run the below commands by connecting the cluster bcz there is a linux commands it wont work in windows so..
+
+5. inside the demo instance firstly install kubectl and eksctl using aws documentation: https://docs.aws.amazon.com/eks/latest/userguide/install-kubectl.html
+
+6. install aws cli for linux
+
+7. configure cluster by using this command :  aws eks --region example_region update-kubeconfig --name cluster_name
+   
+8. Now create a policy EBS_CSI_DRIVER to rollout in EKS cluster
+
+$ export EBS_CSI_POLICY_NAME="Amazon_EBS_CSI_Driver"
+
+$ mkdir ${HOME}/environment/ebs_statefulset
+$ cd ${HOME}/environment/ebs_statefulset
+
+# download the IAM policy document
+$ curl -sSL -o ebs-csi-policy.json https://raw.githubusercontent.com/kubernetes-sigs/aws-ebs-csi-driver/master/docs/example-iam-policy.json
+
+
+$ aws iam create-policy \
+  --region ap-south-1 \
+  --policy-name ebs_csi_driver \
+  --policy-document file://${HOME}/environment/ebs_statefulset/ebs-csi-policy.json
+
+
+$ export EBS_CSI_POLICY_ARN=$(aws --region ap-south-1 iam list-policies --query 'Policies[?PolicyName==`'ebs_csi_driver'`].Arn' --output text)
+
+$ echo $EBS_CSI_POLICY_ARN
+
+$ eksctl utils associate-iam-oidc-provider \
+  --region=ap-south-1 \
+  --cluster=clustername \
+  --approve
+
+$ eksctl create iamserviceaccount \
+  --cluster clustername \
+  --name ebs-csi-controller-irsa \
+  --namespace kube-system \
+  --attach-policy-arn $EBS_CSI_POLICY_ARN \
+  --override-existing-serviceaccounts \
+  --approve
+
+install helm: 
+$ curl -sSL https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+
+$ helm version --short
+
+$ helm repo add aws-ebs-csi-driver https://kubernetes-sigs.github.io/aws-ebs-csi-driver
+
+$ helm search  repo aws-ebs-csi-driver
+
+$ helm upgrade --install aws-ebs-csi-driver \
+  --version=1.2.4 \
+  --namespace kube-system \
+  --set serviceAccount.controller.create=false \
+  --set serviceAccount.snapshot.create=false \
+  --set enableVolumeScheduling=true \
+  --set enableVolumeResizing=true \
+  --set enableVolumeSnapshot=true \
+  --set serviceAccount.snapshot.name=ebs-csi-controller-irsav \
+  --set serviceAccount.controller.name=ebs-csi-controller-irsav \
+  aws-ebs-csi-driver/aws-ebs-csi-driver
+
+$ kubectl -n kube-system rollout status deployment ebs-csi-controller
+
+then start deploying our application
+
+
+
+

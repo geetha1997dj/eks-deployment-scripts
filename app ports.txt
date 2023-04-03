@@ -1,0 +1,23 @@
+hackathon backed 3093                    db name hackathon_new_latest
+hackathon frontend 3002
+hiring backend 3001      9229            db name hiring_db_test_new
+hiring frontend 3000
+appraisal backend 5001                   db name appraisal_test
+appraisal frontend 5000
+
+
+postgres15  using in local
+
+
+
+
+
+ibelong backend 4001
+ibelong frontend 3004
+feedback portal frontend 3006
+feedback portal backend 4005
+control panel frontend 3003
+control panel backend 4002
+email 8055
+standalone 8072
+healthcheck 3000
